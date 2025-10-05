@@ -34,17 +34,17 @@ counties = {
 }
 
 # === Helper functions ===
-def interpret_ndvi(value):
+def interpret_ndvi_bloom(value):
     if value < 0.1:
-        return "Bare land or urban area — no vegetation."
+        return "Barren or urban area — no vegetation or bloom."
     elif value < 0.3:
-        return "Sparse vegetation — likely dry grass or scrubland."
+        return "Low activity — dry grassland or sparse vegetation, no bloom."
     elif value < 0.5:
-        return "Moderate vegetation — healthy shrubs or seasonal crops."
+        return "Early growth — vegetation recovering, limited bloom activity."
     elif value < 0.7:
-        return "Dense vegetation — lush and green, normal bloom."
+        return "Active bloom — vegetation healthy and flowering likely."
     else:
-        return "Very dense vegetation — potential invasive or algal bloom!"
+        return "Peak bloom — dense, vibrant vegetation with full coverage."
 
 def is_anomaly(value, threshold=0.75):
     return value > threshold
@@ -69,7 +69,7 @@ def predict_ndvi(request: NDVIRequest):
     county = request.county.strip().title()
 
     if county not in counties:
-        raise HTTPException(status_code=404, detail="county not supported. Choose Kisumu, Nairobi, or Kericho.")
+        raise HTTPException(status_code=404, detail="county not supported at the moment")
 
     try:
         ts = int(datetime.strptime(request.date, "%Y-%m-%d").timestamp())
@@ -86,6 +86,6 @@ def predict_ndvi(request: NDVIRequest):
         longitude=lon,
         date=request.date,
         predicted_ndvi=float(ndvi),
-        interpretation=interpret_ndvi(ndvi),
+        interpretation=interpret_ndvi_bloom(ndvi),
         anomaly=is_anomaly(ndvi)
     )
